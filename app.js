@@ -14,7 +14,24 @@ conectarDB();
 const app = express();
 
 
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS bloqueado: ${origin} no está permitido.`));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
+
 app.use(express.json());
 app.use(logger); // Se ejecutará en cada petición, antes de llegar a las rutas
 app.use('/auth', authRouter);
